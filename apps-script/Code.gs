@@ -10,8 +10,8 @@
  */
 
 var CONFIG = {
-  NOTIFY_TO: 'CHANGE_ME@gmail.com',   // where John's copy goes
-  REPLY_TO:  'CHANGE_ME@gmail.com',   // where client replies go
+  NOTIFY_TO: 'john.mize@c21center.com',   // where John's copy goes
+  REPLY_TO:  'john.mize@c21center.com',   // where client replies go
   FROM_NAME: 'John Mize Real Estate',
   SHEET_TAB: 'Intake',
   MAX_PER_HOUR: 20                    // spam brake: ignore submissions past this
@@ -21,14 +21,16 @@ function doPost(e) {
   try {
     var p = JSON.parse(e.postData.contents);
 
-    // Honeypot: real people never fill the hidden "website" field
-    if (p.website) return reply_(true);
+    // Honeypot: flag instead of drop, so a real client whose browser autofilled it isn't lost
+    var spam = !!p.website;
+    if (spam) console.warn('Honeypot filled: ' + p.website);
 
     // Rate limit
     var cache = CacheService.getScriptCache();
-    var n = Number(cache.get('count') || 0);
-    if (n >= CONFIG.MAX_PER_HOUR) return reply_(false, 'busy');
-    cache.put('count', String(n + 1), 3600);
+    var key = 'count_' + Utilities.formatDate(new Date(), 'UTC', 'yyyyMMddHH');
+    var n = Number(cache.get(key) || 0);
+    if (n >= CONFIG.MAX_PER_HOUR) { console.warn('Rate limit hit'); return reply_(false, 'busy'); }
+    cache.put(key, String(n + 1), 3600);
 
     // Basic shape check
     if (!p.name || !Array.isArray(p.sections) || !Array.isArray(p.columns) || !Array.isArray(p.values)) {
@@ -37,12 +39,13 @@ function doPost(e) {
 
     // 1. Email to John
     var j = johnEmail(p);
+    if (spam) j.subject = '[CHECK: possible spam] ' + j.subject;
     var opts = { htmlBody: j.html, name: 'Intake Form' };
     if (validEmail_(p.email)) opts.replyTo = p.email;
     MailApp.sendEmail(CONFIG.NOTIFY_TO, j.subject, stripHtml_(j.html), opts);
 
     // 2. Confirmation to client
-    if (validEmail_(p.email)) {
+    if (!spam && validEmail_(p.email)) {
       var c = clientEmail(p);
       MailApp.sendEmail(p.email, c.subject, stripHtml_(c.html), {
         htmlBody: c.html, name: CONFIG.FROM_NAME, replyTo: CONFIG.REPLY_TO
