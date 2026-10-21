@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>John Mize Client Intake</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Spectral:ital,wght@0,500;0,600;1,500&family=Public+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: one calm column, one step at a time, progress rail on top */
+:root{
+  --navy:#16263f; --forest:#1f4d3a; --gold:#b8892b;
+  --bg:#f6f7f5; --surface:#ffffff; --fg:#1b2330; --muted:#5b6573; --line:#d9ddd8;
+  --chip:#eef1ee; --chip-on:#16263f; --chip-on-fg:#ffffff; --accent:#1f4d3a; --warn:#9a3b2b;
+  --display:"Spectral", Georgia, "Times New Roman", serif;
+  --body:"Public Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono:ui-monospace, Consolas, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1622; --surface:#16202f; --fg:#e6e9ee; --muted:#9aa4b2; --line:#2b3748;
+  --chip:#1d2a3c; --chip-on:#d6b46a; --chip-on-fg:#0f1622; --accent:#7fbf9f; --gold:#d6b46a; --navy:#c9d4e6; --warn:#e58e7c; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1622; --surface:#16202f; --fg:#e6e9ee; --muted:#9aa4b2; --line:#2b3748;
+  --chip:#1d2a3c; --chip-on:#d6b46a; --chip-on-fg:#0f1622; --accent:#7fbf9f; --gold:#d6b46a; --navy:#c9d4e6; --warn:#e58e7c; color-scheme:dark}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.55 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 64px}
+.wrap{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+.wrap.wide{max-width:960px}
+header{display:flex;align-items:center;gap:12px}
+header svg{flex:none}
+.brand{font:600 15px/1.2 var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--navy)}
+.brand small{display:block;font-weight:400;letter-spacing:.02em;text-transform:none;color:var(--muted);font-size:13px;margin-top:2px}
+.rail{display:flex;gap:4px}
+.rail span{flex:1;height:4px;border-radius:2px;background:var(--line);transition:background .25s}
+.rail span.done{background:var(--accent)} .rail span.now{background:var(--gold)}
+.stepmeta{font-size:13px;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;font-weight:600;margin-top:8px}
+form{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:clamp(20px,5vw,36px);min-width:0}
+.step{display:flex;flex-direction:column;gap:22px;min-width:0}
+h1,h2,h3{font-family:var(--display);font-weight:600;color:var(--navy);text-wrap:balance;margin:0;line-height:1.2}
+h1{font-size:clamp(26px,6vw,34px)} h2{font-size:clamp(22px,5vw,28px)} h3{font-size:19px}
+.lede{color:var(--muted);margin:-10px 0 0;max-width:60ch}
+.q{display:flex;flex-direction:column;gap:8px;border:0;padding:0;margin:0;min-width:0}
+.q>label,.q>legend{font-weight:600;padding:0}
+.hint{font-size:14px;color:var(--muted);font-weight:400;margin:-4px 0 0}
+.opt{font-weight:400;color:var(--muted);font-size:14px}
+input[type=text],input[type=email],input[type=tel],input[type=date],select,textarea{
+  font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:11px 12px;width:100%;box-sizing:border-box}
+textarea{min-height:88px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,.chips label:has(input:focus-visible),button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:16px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.col{display:flex;flex-direction:column;gap:18px;min-width:0}
+.col h3 .opt{font-family:var(--body);font-size:13px}
+@media (max-width:620px){.cols{grid-template-columns:1fr}.col+.col{border-top:1px solid var(--line);padding-top:22px}}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips label{display:inline-flex;align-items:center;padding:9px 14px;border-radius:999px;background:var(--chip);cursor:pointer;font-size:15px;user-select:none;transition:background .15s,color .15s}
+.chips input{position:absolute;opacity:0;pointer-events:none}
+.chips label:has(input:checked){background:var(--chip-on);color:var(--chip-on-fg)}
+.big .chips label{padding:14px 18px;font-size:16px;border-radius:8px;flex:1 1 160px;justify-content:center}
+.callout{border-left:3px solid var(--gold);padding:4px 0 4px 14px;color:var(--muted);font-size:15px;font-style:italic;font-family:var(--display);margin:0}
+.err{color:var(--warn);font-size:14px;min-height:1em}
+.nav{display:flex;justify-content:space-between;gap:12px;margin-top:8px;flex-wrap:wrap}
+button{font:600 15px var(--body);border-radius:6px;padding:12px 22px;cursor:pointer;border:1px solid var(--line);background:transparent;color:var(--fg)}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--surface)}
+button.small{padding:7px 12px;font-size:13px}
+.preview{font-size:13px;color:var(--muted);background:var(--chip);border-radius:6px;padding:10px 12px;margin:0}
+.mailbox{border:1px solid var(--line);border-radius:6px;overflow:hidden}
+.mailhead{font:13px var(--mono);padding:10px 12px;border-bottom:1px solid var(--line);background:var(--chip);overflow-wrap:anywhere;white-space:pre-wrap}
+.mailbody{background:#ffffff;color:#1b1b1b;padding:14px;overflow-x:auto}
+footer{font-size:13px;color:var(--muted);text-align:center}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<div class="wrap" id="wrap">
+  <header>
+    <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+      <circle cx="20" cy="20" r="18" fill="none" stroke="var(--gold)" stroke-width="1.5"/>
+      <path d="M20 4 L23 20 L20 36 L17 20 Z" fill="var(--navy)"/>
+      <path d="M4 20 L20 17 L36 20 L20 23 Z" fill="var(--gold)" opacity=".85"/>
+      <path d="M20 4 L23 20 L17 20 Z" fill="var(--accent)"/>
+    </svg>
+    <div class="brand">John Mize Real Estate<small>Century 21 Real Estate Center · Lynnwood</small></div>
+  </header>
+
+  <div>
+    <div class="rail" id="rail"></div>
+    <div class="stepmeta" id="stepmeta"></div>
+  </div>
+
+  <form id="f" novalidate>
+
+    <!-- Path -->
+    <section class="step big" data-step="path" data-code="PLAN" data-title="Your plans">
+      <h1>What are you planning?</h1>
+      <p class="lede">About 5 minutes.  Answer what you can and skip what you don't know yet.  We'll fill in the rest when we meet.</p>
+      <fieldset class="q" data-req="Plan" data-label="your plans"><legend class="opt">Choose one</legend>
+        <div class="chips">
+          <label><input type="radio" name="Plan" value="Buying">Buying a home</label>
+          <label><input type="radio" name="Plan" value="Selling">Selling a home</label>
+          <label><input type="radio" name="Plan" value="Selling and buying">Selling and buying</label>
+        </div></fieldset>
+      <div class="err"></div>
+    </section>
+
+    <!-- About you -->
+    <section class="step" data-step="you" data-code="CONTACT" data-title="About you" hidden>
+      <h2>How to reach you</h2>
+      <div class="cols">
+        <div class="col">
+          <h3>You</h3>
+          <div class="q" data-req="Name" data-label="your name"><label for="name">Name</label><input id="name" name="Name" type="text" autocomplete="name"></div>
+          <div class="q"><label for="email">Email you actually check</label><input id="email" name="Email" type="email" autocomplete="email"></div>
+          <div class="q"><label for="phone">Mobile</label><input id="phone" name="Mobile" type="tel" autocomplete="tel"></div>
+          <fieldset class="q"><legend>Best way to reach you</legend>
+            <div class="chips">
+              <label><input type="checkbox" name="Contact by" value="Text">Text</label>
+              <label><input type="checkbox" name="Contact by" value="Call">Call</label>
+              <label><input type="checkbox" name="Contact by" value="Email">Email</label>
+            </div></fieldset>
+          <fieldset class="q"><legend>Usually free</legend>
+            <div class="chips">
+              <label><input type="checkbox" name="Free" value="Weekday AM">Weekday mornings</label>
+              <label><input type="checkbox" name="Free" value="Weekday PM">Afternoons</label>
+              <label><input type="checkbox" name="Free" value="Evenings">Evenings</label>
+              <label><input type="checkbox" name="Free" value="Weekends">Weekends</label>
+            </div></fieldset>
+        </div>
+        <div class="col">
+          <h3>Co-buyer or co-owner <span class="opt">(optional)</span></h3>
+          <div class="q"><label for="cname">Name</label><input id="cname" name="Co name" type="text"></div>
+          <div class="q"><label for="cemail">Email</label><input id="cemail" name="Co email" type="email"></div>
+          <div class="q"><label for="cphone">Mobile</label><input id="cphone" name="Co mobile" type="tel"></div>
+          <fieldset class="q"><legend>Best way to reach them</legend>
+            <div class="chips">
+              <label><input type="checkbox" name="Co contact by" value="Text">Text</label>
+              <label><input type="checkbox" name="Co contact by" value="Call">Call</label>
+              <label><input type="checkbox" name="Co contact by" value="Email">Email</label>
+            </div></fieldset>
+          <fieldset class="q"><legend>Usually free</legend>
+            <div class="chips">
+              <label><input type="checkbox" name="Co free" value="Weekday AM">Weekday mornings</label>
+              <label><input type="checkbox" name="Co free" value="Weekday PM">Afternoons</label>
+              <label><input type="checkbox" name="Co free" value="Evenings">Evenings</label>
+              <label><input type="checkbox" name="Co free" value="Weekends">Weekends</label>
+            </div></fieldset>
+        </div>
+      </div>
+      <div class="err"></div>
+    </section>
+
+    <!-- Buyer: situation & money -->
+    <section class="step" data-step="buy1" data-path="buy" data-code="BUY SITUATION" data-title="Buying: where you stand" hidden>
+      <h2>Where you stand today</h2>
+      <fieldset class="q" data-show="Plan=Buying"><legend>Do you currently own or rent?</legend>
+        <div class="chips">
+          <label><input type="radio" name="Currently" value="Own">Own</label>
+          <label><input type="radio" name="Currently" value="Rent">Rent</label>
+          <label><input type="radio" name="Currently" value="Other">Other</label>
+        </div></fieldset>
+      <div class="q" data-show="Currently=Rent"><label for="lease">When does your lease end?</label><input id="lease" name="Lease ends" type="date"></div>
+      <fieldset class="q" data-show="Currently=Own;Plan=Selling and buying"><legend>Do you need to sell before you can buy?</legend>
+        <div class="chips">
+          <label><input type="radio" name="Must sell first" value="Yes">Yes</label>
+          <label><input type="radio" name="Must sell first" value="No">No</label>
+          <label><input type="radio" name="Must sell first" value="Not sure">Not sure</label>
+        </div></fieldset>
+      <fieldset class="q"><legend>When would you like to be moved in?</legend>
+        <div class="chips">
+          <label><input type="radio" name="Buy timeline" value="0-3 mo">0 to 3 months</label>
+          <label><input type="radio" name="Buy timeline" value="3-6 mo">3 to 6 months</label>
+          <label><input type="radio" name="Buy timeline" value="6-12 mo">6 to 12 months</label>
+          <label><input type="radio" name="Buy timeline" value="Exploring">Just exploring</label>
+        </div></fieldset>
+      <div class="q"><label for="deadline">Any hard deadline? <span class="opt">(optional)</span></label><input id="deadline" name="Buy deadline" type="text" placeholder="Job start, school year, lease end..."></div>
+      <fieldset class="q"><legend>How are you paying?</legend>
+        <div class="chips">
+          <label><input type="radio" name="Payment" value="Loan">Loan</label>
+          <label><input type="radio" name="Payment" value="Cash">Cash</label>
+          <label><input type="radio" name="Payment" value="Not sure">Not sure yet</label>
+        </div></fieldset>
+      <fieldset class="q" data-show="Payment=Loan|Not sure"><legend>Have you talked with a lender?</legend>
+        <div class="chips">
+          <label><input type="radio" name="Lender status" value="Pre-approved">Pre-approved</label>
+          <label><input type="radio" name="Lender status" value="Talked, not approved">Talked, not approved yet</label>
+          <label><input type="radio" name="Lender status" value="Not yet">Not yet</label>
+        </div></fieldset>
+      <div class="row" data-show="Lender status=Pre-approved|Talked, not approved">
+        <div class="q"><label for="lender">Lender and loan officer</label><input id="lender" name="Lender" type="text"></div>
+        <div class="q"><label for="approved">Approved amount <span class="opt">(if known)</span></label><input id="approved" name="Approved amount" type="text" inputmode="numeric" placeholder="$"></div>
+      </div>
+      <fieldset class="q" data-show="Lender status=Not yet"><legend>Want an introduction to a lender I trust?</legend>
+        <div class="chips">
+          <label><input type="radio" name="Lender intro" value="Yes">Yes, please</label>
+          <label><input type="radio" name="Lender intro" value="No">No thanks</label>
+        </div></fieldset>
+      <div class="row">
+        <div class="q"><label for="price">Price range you're considering</label><input id="price" name="Price range" type="text" placeholder="e.g. $650k to $750k"></div>
+        <div class="q" data-hide="Payment=Cash" data-req="Monthly payment" data-label="comfortable monthly payment"><label for="monthly">Comfortable monthly payment</label><input id="monthly" name="Monthly payment" type="text" placeholder="$ per month, all-in"></div>
+      </div>
+      <fieldset class="q" data-hide="Payment=Cash"><legend>Interested in down payment assistance programs?</legend>
+        <div class="chips">
+          <label><input type="radio" name="DPA interest" value="Yes">Yes</label>
+          <label><input type="radio" name="DPA interest" value="No">No</label>
+          <label><input type="radio" name="DPA interest" value="Tell me more">Tell me more</label>
+        </div></fieldset>
+      <fieldset class="q"><legend>Have you signed a buyer agreement with another agent?</legend>
+        <p class="hint">Washington requires a written buyer agreement before an agent can show homes, so I ask up front.</p>
+        <div class="chips">
+          <label><input type="radio" name="Other buyer agreement" value="No">No</label>
+          <label><input type="radio" name="Other buyer agreement" value="Yes">Yes</label>
+          <label><input type="radio" name="Other buyer agreement" value="Not sure">Not sure</label>
+        </div></fieldset>
+      <div class="err"></div>
+    </section>
+
+    <!-- Buyer: the home -->
+    <section class="step" data-step="buy2" data-path="buy" data-code="BUY HOME" data-title="Buying: the home" hidden>
+      <h2>The home you're looking for</h2>
+      <div class="q"><label for="areas">Areas or neighborhoods</label><input id="areas" name="Areas" type="text" placeholder="Lynnwood, Mill Creek, north Seattle..."></div>
+      <div class="q"><label for="near">Places you need to be close to <span class="opt">(optional)</span></label><input id="near" name="Near" type="text" placeholder="Work, family, a specific school, freeway access..."></div>
+      <fieldset class="q"><legend>Property type</legend>
+        <div class="chips">
+          <label><input type="checkbox" name="Property type" value="House">House</label>
+          <label><input type="checkbox" name="Property type" value="Townhome">Townhome</label>
+          <label><input type="checkbox" name="Property type" value="Condo">Condo</label>
+          <label><input type="checkbox" name="Property type" value="New construction">New construction</label>
+          <label><input type="checkbox" name="Property type" value="Land">Land</label>
+        </div></fieldset>
+      <div class="row">
+        <div class="q"><label for="beds">Bedrooms (min)</label><select id="beds" name="Beds min"><option value="">Any</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select></div>
+        <div class="q"><label for="baths">Bathrooms (min)</label><select id="baths" name="Baths min"><option value="">Any</option><option>1</option><option>1.75</option><option>2</option><option>2.5</option><option>3+</option></select></div>
+        <div class="q"><label for="sqft">Square feet (min)</label><input id="sqft" name="Sq ft min" type="text" inputmode="numeric"></div>
+      </div>
+      <div class="q"><label for="must">Must-haves</label><textarea id="must" name="Must-haves" placeholder="Garage, one-level living, yard, home office..."></textarea></div>
+      <div class="q"><label for="nice">Nice-to-haves</label><textarea id="nice" name="Nice-to-haves"></textarea></div>
+      <div class="q"><label for="no">Dealbreakers</label><textarea id="no" name="Dealbreakers" placeholder="HOA, busy street, major projects..."></textarea></div>
+      <div class="q"><label for="accom">Anything the home needs to accommodate? <span class="opt">(optional)</span></label><input id="accom" name="Accommodate" type="text" placeholder="Stairs, RV parking, workshop, pets..."></div>
+      <div class="err"></div>
+    </section>
+
+    <!-- Seller: the property -->
+    <section class="step" data-step="sell1" data-path="sell" data-code="SELL PROPERTY" data-title="Selling: the property" hidden>
+      <h2>The home you're selling</h2>
+      <div class="q"><label for="addr">Property address</label><input id="addr" name="Property address" type="text" autocomplete="street-address"></div>
+      <fieldset class="q"><legend>Is that also your mailing address?</legend>
+        <div class="chips">
+          <label><input type="radio" name="Mailing same" value="Yes">Yes</label>
+          <label><input type="radio" name="Mailing same" value="No">No</label>
+        </div></fieldset>
+      <div class="q" data-show="Mailing same=No"><label for="mail">Mailing address</label><input id="mail" name="Mailing address" type="text"></div>
+      <fieldset class="q"><legend>Who lives there now?</legend>
+        <div class="chips">
+          <label><input type="radio" name="Occupancy" value="Owner">Me / us</label>
+          <label><input type="radio" name="Occupancy" value="Tenant">Tenant</label>
+          <label><input type="radio" name="Occupancy" value="Vacant">Vacant</label>
+        </div></fieldset>
+      <div class="q" data-show="Occupancy=Tenant"><label for="tlease">Tenant lease end and any notice terms</label><input id="tlease" name="Tenant lease" type="text"></div>
+      <div class="q"><label for="owned">How long have you owned it?</label><input id="owned" name="Years owned" type="text"></div>
+      <p class="hint">Beds, baths, square feet and year built are in public records, so I'll pull those myself.</p>
+      <div class="q"><label for="updates">Updates in the last 10 years</label><textarea id="updates" name="Updates" placeholder="Roof 2019, kitchen 2021, new furnace..."></textarea></div>
+      <div class="q"><label for="issues">Anything you know needs attention?</label><textarea id="issues" name="Known issues" placeholder="It helps to know early.  We'll go over Form 17 disclosures together."></textarea></div>
+      <div class="row">
+        <fieldset class="q"><legend>Septic system?</legend>
+          <div class="chips">
+            <label><input type="radio" name="Septic" value="Yes">Yes</label>
+            <label><input type="radio" name="Septic" value="No">No</label>
+            <label><input type="radio" name="Septic" value="Not sure">Not sure</label>
+          </div></fieldset>
+        <fieldset class="q"><legend>HOA?</legend>
+          <div class="chips">
+            <label><input type="radio" name="HOA" value="Yes">Yes</label>
+            <label><input type="radio" name="HOA" value="No">No</label>
+          </div></fieldset>
+      </div>
+      <div class="q" data-show="HOA=Yes"><label for="hoaamt">HOA dues</label><input id="hoaamt" name="HOA dues" type="text" placeholder="$ per month (or per year)"></div>
+      <div class="q"><label for="love">What do you love most about this home?</label><textarea id="love" name="What they love" placeholder="This often ends up in the listing."></textarea></div>
+      <div class="err"></div>
+    </section>
+
+    <!-- Seller: plans -->
+    <section class="step" data-step="sell2" data-path="sell" data-code="SELL PLANS" data-title="Selling: your plans" hidden>
+      <h2>Your plans for the sale</h2>
+      <div class="q"><label for="why">What's prompting the move?</label><textarea id="why" name="Reason for selling"></textarea></div>
+      <div class="row">
+        <div class="q"><label for="where">Where are you headed?</label><input id="where" name="Moving to" type="text"></div>
+        <div class="q"><label for="when">When do you need to be there?</label><input id="when" name="Need to be there by" type="text"></div>
+      </div>
+      <fieldset class="q"><legend>When would you like to list?</legend>
+        <div class="chips">
+          <label><input type="radio" name="List timeline" value="ASAP">As soon as possible</label>
+          <label><input type="radio" name="List timeline" value="1-3 mo">1 to 3 months</label>
+          <label><input type="radio" name="List timeline" value="3-6 mo">3 to 6 months</label>
+          <label><input type="radio" name="List timeline" value="Exploring">Just exploring</label>
+        </div></fieldset>
+      <div class="q"><label for="price2">Price you have in mind <span class="opt">(optional)</span></label><input id="price2" name="Price idea" type="text" placeholder="A number, a range, or 'no idea'"></div>
+      <div class="q"><label for="owe">Roughly what's owed on the property? <span class="opt">(optional)</span></label><input id="owe" name="Approx owed" type="text" placeholder="Helps me estimate your net.  We can cover this when we meet."></div>
+      <fieldset class="q"><legend>Have you talked with other agents?</legend>
+        <div class="chips">
+          <label><input type="radio" name="Other agents" value="No">No</label>
+          <label><input type="radio" name="Other agents" value="Yes">Yes</label>
+          <label><input type="radio" name="Other agents" value="Planning to">Planning to</label>
+        </div></fieldset>
+      <fieldset class="q"><legend>Where should we meet?</legend>
+        <div class="chips">
+          <label><input type="radio" name="Meet at" value="Your home">At your home</label>
+          <label><input type="radio" name="Meet at" value="Coffee/tea">Coffee/tea</label>
+          <label><input type="radio" name="Meet at" value="Video call">Video call</label>
+          <label><input type="radio" name="Meet at" value="Other">Other</label>
+        </div></fieldset>
+      <div class="q" data-show="Meet at=Other"><label for="meeto">Where works for you?</label><input id="meeto" name="Meet at other" type="text"></div>
+      <div class="err"></div>
+    </section>
+
+    <!-- Decision -->
+    <section class="step" data-step="decide" data-code="DECISION" data-title="Making the decision" hidden>
+      <h2>Making a good decision</h2>
+      <p class="callout">My job is to help you make a decision you'll still feel good about years from now.  These questions help me understand what that looks like for you.</p>
+      <div class="q"><label for="d1">Five years from now, what would tell you this was a good decision?</label><textarea id="d1" name="Good decision"></textarea></div>
+      <div class="q"><label for="d2">What worries you most about this move?</label><textarea id="d2" name="Biggest worry"></textarea></div>
+      <div class="q"><label for="d3">Who else weighs in, and how do you usually make big decisions together?</label><textarea id="d3" name="Decision process"></textarea></div>
+      <fieldset class="q"><legend>If you had to choose, which matters most?</legend>
+        <div class="chips">
+          <label><input type="radio" name="Top priority" value="Price">Price</label>
+          <label><input type="radio" name="Top priority" value="Timing">Timing</label>
+          <label><input type="radio" name="Top priority" value="Location">Location</label>
+          <label><input type="radio" name="Top priority" value="The right home">The right home</label>
+          <label><input type="radio" name="Top priority" value="Low stress">Low stress</label>
+        </div></fieldset>
+      <div class="q"><label for="d4">Tell me more...</label><textarea id="d4" name="Priority notes"></textarea></div>
+      <div class="q"><label for="d5">Think about a past move or big purchase.  What would you do differently this time?</label><textarea id="d5" name="Past lessons"></textarea></div>
+      <div class="err"></div>
+    </section>
+
+    <!-- Wrap -->
+    <section class="step" data-step="wrap" data-code="PREFERENCES" data-title="Last details" hidden>
+      <h2>Last few things</h2>
+      <fieldset class="q"><legend>How much detail do you want from me?</legend>
+        <div class="chips">
+          <label><input type="radio" name="Detail level" value="Headlines">Just the headlines</label>
+          <label><input type="radio" name="Detail level" value="Balanced">A balance</label>
+          <label><input type="radio" name="Detail level" value="Everything">All of it, I like data</label>
+        </div></fieldset>
+      <fieldset class="q"><legend>How often works for you?</legend>
+        <p class="hint">Anything time-sensitive, I'll tell you right away regardless.</p>
+        <div class="chips">
+          <label><input type="radio" name="Update freq" value="Daily">Daily</label>
+          <label><input type="radio" name="Update freq" value="Weekly">Weekly</label>
+          <label><input type="radio" name="Update freq" value="Other">Other</label>
+        </div></fieldset>
+      <div class="q" data-show="Update freq=Other"><label for="freqo">Describe what works</label><input id="freqo" name="Update freq other" type="text"></div>
+      <div class="q"><label for="src">How did you hear about me?</label><input id="src" name="Referral source" type="text"></div>
+      <div class="q"><label for="else">Anything else I should know?</label><textarea id="else" name="Anything else"></textarea></div>
+      <div class="err"></div>
+    </section>
+
+    <!-- Done -->
+    <section class="step" data-step="done" hidden>
+      <h2>Thank you</h2>
+      <p class="lede" style="margin:0">I'll review your answers before we talk so we can spend our time on what matters.  I'll be in touch within one business day.</p>
+      <p id="book" hidden><a id="booklink" href="#" target="_blank" rel="noopener">Pick a time to meet</a></p>
+      <div id="previewbox" hidden style="display:flex;flex-direction:column;gap:12px">
+        <p class="preview">Preview mode: nothing was sent.  On the live site, John gets the first email, the client gets the second, and the tracker row is added to the Google Sheet.</p>
+        <h3>Email to John</h3>
+        <div class="mailbox">
+          <div class="mailhead" id="mailhead"></div>
+          <div class="mailbody" id="mailbody"></div>
+        </div>
+        <div><button type="button" class="small" id="copytsv">Copy tracker row as tab-separated text</button> <span class="opt" id="copied"></span></div>
+        <h3>Confirmation to client</h3>
+        <div class="mailbox">
+          <div class="mailhead" id="mailhead2"></div>
+          <div class="mailbody" id="mailbody2"></div>
+        </div>
+      </div>
+    </section>
+
+    <input type="text" name="website" id="website" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0">
+
+    <div class="nav" id="nav">
+      <button type="button" id="back">Back</button>
+      <button type="button" class="primary" id="next">Continue</button>
+    </div>
+  </form>
+
+  <footer>John Mize · Real Estate Broker · 206-465-4209 · john.mize@c21center.com</footer>
+</div>
+
+<script>
+const CONFIG = {
+  endpoint: "",   // live site: web app URL that emails John (and optionally logs to a sheet). Blank = preview mode
+  bookingUrl: ""  // optional Calendly or Microsoft Bookings link
+};
+const f = document.getElementById('f');
+const steps = [...f.querySelectorAll('.step')].filter(s => s.dataset.step !== 'done');
+const doneStep = f.querySelector('[data-step="done"]');
+const KEY = 'jm-intake-draft-v2';
+let i = 0;
+
+const condOff = el => !!el.closest('[data-show][hidden],[data-hide][hidden]');
+function raw(n){
+  const els = f.elements[n]; if (!els) return '';
+  const list = (els.length !== undefined && !els.tagName) ? [...els] : [els];
+  if (list.every(condOff)) return '';
+  if (list[0].type === 'radio' || list[0].type === 'checkbox') return list.filter(e => e.checked).map(e => e.value).join(', ');
+  return (list[0].value || '').trim();
+}
+const plan = () => raw('Plan');
+function active(){
+  const p = plan();
+  return steps.filter(s => !s.dataset.path || (s.dataset.path === 'buy' ? /Buy/i.test(p) : /Sell/i.test(p)));
+}
+function stepLive(st){ return !st.dataset.path || active().includes(st); }
+function val(n){
+  const el = f.elements[n]; const one = el && (el.tagName ? el : el[0]);
+  if (one && !stepLive(one.closest('.step'))) return '';
+  return raw(n);
+}
+const match = spec => spec.split(';').some(c => { const [n, v] = c.split('='); return v.split('|').includes(raw(n)); });
+function conditionals(){
+  f.querySelectorAll('[data-show],[data-hide]').forEach(el => {
+    el.hidden = el.dataset.show ? !match(el.dataset.show) : match(el.dataset.hide);
+  });
+}
+function render(){
+  const list = active();
+  steps.forEach(s => s.hidden = true);
+  list[i].hidden = false;
+  document.getElementById('rail').innerHTML = list.map((_, k) => `<span class="${k < i ? 'done' : k === i ? 'now' : ''}"></span>`).join('');
+  document.getElementById('stepmeta').textContent = `Step ${i + 1} of ${list.length} · ${list[i].dataset.title}`;
+  document.getElementById('back').style.visibility = i === 0 ? 'hidden' : 'visible';
+  document.getElementById('next').textContent = i === list.length - 1 ? 'Send to John' : 'Continue';
+  conditionals();
+}
+function check(){
+  const st = active()[i]; const err = st.querySelector('.err');
+  for (const q of st.querySelectorAll('[data-req]')){
+    if (condOff(q) || q.hidden) continue;
+    if (!raw(q.dataset.req)) { err.textContent = `Please add ${q.dataset.label}.`; return false; }
+  }
+  if (st.dataset.step === 'you' && !raw('Email') && !raw('Mobile')){ err.textContent = 'Please add an email or mobile number so I can reach you.'; return false; }
+  if (err) err.textContent = '';
+  return true;
+}
+// All field names in DOM order = fixed tracker column order
+const allNames = [...new Set([...f.elements].filter(e => e.name && e.name !== 'website').map(e => e.name))];
+function labelFor(n, st){
+  if (st.dataset.step === 'you' || st.dataset.step === 'path') return n;
+  const el = f.querySelector(`[name="${CSS.escape(n)}"]`);
+  const lab = el && el.closest('.q') && el.closest('.q').querySelector(':scope>legend, :scope>label');
+  const t = lab ? lab.textContent.replace(/\((optional|if known)\)/gi, '').trim() : '';
+  return t || n;
+}
+function sections(){
+  return [...steps].filter(stepLive).map(st => {
+    const names = [...new Set([...st.querySelectorAll('[name]')].map(e => e.name))];
+    return { code: st.dataset.code, title: st.dataset.title, rows: names.map(n => [n, labelFor(n, st), val(n)]).filter(r => r[2]) };
+  }).filter(s => s.rows.length);
+}
+function save(){ try { const d = {}; allNames.forEach(n => { const v = raw(n); if (v) d[n] = v; }); localStorage.setItem(KEY, JSON.stringify(d)); } catch(e){} }
+function restore(){
+  let d; try { d = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch(e){}
+  if (!d) return;
+  Object.entries(d).forEach(([n, v]) => {
+    const els = f.elements[n]; if (!els) return;
+    const list = (els.length !== undefined && !els.tagName) ? [...els] : [els];
+    if (list[0].type === 'radio' || list[0].type === 'checkbox'){ const parts = v.split(', '); list.forEach(e => e.checked = parts.includes(e.value)); }
+    else list[0].value = v;
+  });
+}
+function stamp(){ const d = new Date(), p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`; }
+function payload(){
+  const ts = stamp();
+  return {
+    ts, plan: plan(), name: val('Name'), coName: val('Co name'), mobile: val('Mobile'), email: val('Email'),
+    buyTL: val('Buy timeline'), listTL: val('List timeline'), sections: sections(),
+    columns: ['Submitted', ...allNames], values: [ts, ...allNames.map(val)],
+    website: f.elements['website'].value
+  };
+}
+
+/* ===== SHARED EMAIL BUILDERS: keep identical to the copy in Code.gs ===== */
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+function johnEmail(p){
+  var tl = [p.listTL ? 'Sell ' + p.listTL : '', p.buyTL ? 'Buy ' + p.buyTL : ''].filter(Boolean).join(' / ');
+  var subject = ['INTAKE', p.name + (p.coName ? ' + ' + p.coName : ''), p.plan, tl].filter(Boolean).join(' | ');
+  var font = "font-family:Consolas,Menlo,'Courier New',monospace;font-size:13px;";
+  var td = "padding:4px 10px;border:1px solid #d0d0d0;vertical-align:top;";
+  var html = '<div style="' + font + 'color:#1b1b1b">';
+  html += '<div style="margin-bottom:10px">' + [p.plan, p.name, p.mobile, p.email, p.ts].map(esc).join(' | ') + '</div>';
+  p.sections.forEach(function(s){
+    html += '<table style="border-collapse:collapse;margin:0 0 14px;' + font + '"><tr><th colspan="2" style="' + td + 'text-align:left;background:#16263f;color:#ffffff;letter-spacing:.05em">' + esc(s.code) + '</th></tr>';
+    s.rows.forEach(function(r){ html += '<tr><td style="' + td + 'color:#555555;white-space:nowrap">' + esc(r[0]) + '</td><td style="' + td + 'white-space:pre-wrap">' + esc(r[2]) + '</td></tr>'; });
+    html += '</table>';
+  });
+  html += '<div style="margin:6px 0 4px;color:#555555">TRACKER (one row, fixed columns)</div><table style="border-collapse:collapse;' + font + '"><tr>';
+  html += p.columns.map(function(c){ return '<th style="' + td + 'background:#eef1ee;text-align:left;white-space:nowrap">' + esc(c) + '</th>'; }).join('');
+  html += '</tr><tr>' + p.values.map(function(v){ return '<td style="' + td + 'white-space:nowrap">' + esc(String(v).replace(/\s*\n\s*/g, ' / ')) + '</td>'; }).join('') + '</tr></table></div>';
+  return { subject: subject, html: html };
+}
+function clientEmail(p){
+  var first = esc((p.name || '').trim().split(/\s+/)[0]);
+  var font = "font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#1b2330;";
+  var td = "padding:6px 10px;border-bottom:1px solid #e3e6e2;vertical-align:top;font-size:14px;";
+  var html = '<div style="' + font + 'max-width:620px">';
+  html += '<p>Hi ' + first + ',</p><p>Thanks for taking the time.  Here\'s a copy of what you sent me.  I\'ll review it before we talk.  If anything changes, just reply to this email.</p>';
+  p.sections.forEach(function(s){
+    html += '<p style="margin:22px 0 6px;font-weight:bold;color:#16263f;border-bottom:2px solid #b8892b;padding-bottom:4px">' + esc(s.title) + '</p><table style="border-collapse:collapse;width:100%">';
+    s.rows.forEach(function(r){ html += '<tr><td style="' + td + 'color:#5b6573;width:42%">' + esc(r[1]) + '</td><td style="' + td + 'white-space:pre-wrap">' + esc(r[2]) + '</td></tr>'; });
+    html += '</table>';
+  });
+  html += '<p style="margin-top:26px">John Mize<br>Real Estate Broker<br>Century 21 Real Estate Center<br>206-465-4209</p></div>';
+  return { subject: 'Copy of your answers | John Mize Real Estate', html: html };
+}
+/* ===== END SHARED ===== */
+
+async function submit(){
+  const p = payload();
+  if (CONFIG.endpoint){
+    const btn = document.getElementById('next'); btn.disabled = true; btn.textContent = 'Sending...';
+    try {
+      const r = await fetch(CONFIG.endpoint, { method:'POST', headers:{'Content-Type':'text/plain;charset=utf-8'}, body: JSON.stringify(p) });
+      const j = await r.json();
+      if (!j.ok) throw 0;
+    } catch(e){
+      btn.disabled = false; btn.textContent = 'Send to John';
+      active()[i].querySelector('.err').textContent = "That didn't go through.  Check your connection and try again, or call 206-465-4209."; return;
+    }
+  }
+  const mail = johnEmail(p), mail2 = clientEmail(p);
+  mail.tsvHeader = p.columns.join('\t');
+  mail.tsv = p.values.map(v => String(v).replace(/[\t\n\r]+/g, ' / ')).join('\t');
+  try { localStorage.removeItem(KEY); } catch(e){}
+  steps.forEach(s => s.hidden = true);
+  document.getElementById('nav').hidden = true;
+  document.getElementById('rail').innerHTML = '';
+  document.getElementById('stepmeta').textContent = 'Done';
+  doneStep.hidden = false;
+  if (CONFIG.bookingUrl){ document.getElementById('book').hidden = false; document.getElementById('booklink').href = CONFIG.bookingUrl; }
+  if (!CONFIG.endpoint){
+    document.getElementById('wrap').classList.add('wide');
+    document.getElementById('previewbox').hidden = false;
+    document.getElementById('mailhead').textContent = 'Subject: ' + mail.subject;
+    document.getElementById('mailbody').innerHTML = mail.html;
+    document.getElementById('mailhead2').textContent = 'To: ' + (p.email || '(no email given, so no confirmation is sent)') + '\nSubject: ' + mail2.subject;
+    document.getElementById('mailbody2').innerHTML = mail2.html;
+    document.getElementById('copytsv').onclick = async () => {
+      const t = mail.tsvHeader + '\n' + mail.tsv;
+      try { await navigator.clipboard.writeText(t); document.getElementById('copied').textContent = 'Copied header + row.'; }
+      catch(e){ document.getElementById('copied').textContent = 'Copy blocked here.  Select the tracker table above instead.'; }
+    };
+  }
+  window.scrollTo({ top: 0 });
+}
+document.getElementById('next').addEventListener('click', () => {
+  if (!check()) return;
+  if (i === active().length - 1) return submit();
+  i++; render(); save(); window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+document.getElementById('back').addEventListener('click', () => { if (i > 0){ i--; render(); window.scrollTo({ top: 0 }); } });
+f.addEventListener('change', () => { conditionals(); save(); });
+f.addEventListener('input', () => { const e = active()[i].querySelector('.err'); if (e) e.textContent = ''; });
+f.addEventListener('submit', e => e.preventDefault());
+restore(); render();
+</script>
+
+</body>
+</html>
