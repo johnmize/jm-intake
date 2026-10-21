@@ -199,7 +199,7 @@ footer{font-size:13px;color:var(--muted);text-align:center}
         </div></fieldset>
       <div class="row">
         <div class="q"><label for="price">Price range you're considering</label><input id="price" name="Price range" type="text" placeholder="e.g. $650k to $750k"></div>
-        <div class="q" data-hide="Payment=Cash" data-req="Monthly payment" data-label="comfortable monthly payment"><label for="monthly">Comfortable monthly payment</label><input id="monthly" name="Monthly payment" type="text" placeholder="$ per month, all-in"></div>
+        <div class="q" data-hide="Payment=Cash"><label for="monthly">Comfortable monthly payment</label><input id="monthly" name="Monthly payment" type="text" placeholder="$ per month, all-in"></div>
       </div>
       <fieldset class="q" data-hide="Payment=Cash"><legend>Interested in down payment assistance programs?</legend>
         <div class="chips">
@@ -231,7 +231,8 @@ footer{font-size:13px;color:var(--muted);text-align:center}
           <label><input type="checkbox" name="Property type" value="Land">Land</label>
           <label><input type="checkbox" name="Property type" value="Other">Other</label>
         </div></fieldset>
-        <div class="q" data-show="Property type=Other"><label for="ptypeo">What type?</label><input id="ptypeo" name="Property type other" type="text"></div>      <div class="row">
+      <div class="q" data-show="Property type=Other"><label for="ptypeo">What type?</label><input id="ptypeo" name="Property type other" type="text"></div>
+      <div class="row">
         <div class="q"><label for="beds">Bedrooms (min)</label><select id="beds" name="Beds min"><option value="">Any</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5+</option></select></div>
         <div class="q"><label for="baths">Bathrooms (min)</label><select id="baths" name="Baths min"><option value="">Any</option><option>1</option><option>1.75</option><option>2</option><option>2.5</option><option>3+</option></select></div>
         <div class="q"><label for="sqft">Square feet (min)</label><input id="sqft" name="Sq ft min" type="text" inputmode="numeric"></div>
@@ -420,7 +421,8 @@ function val(n){
   if (one && !stepLive(one.closest('.step'))) return '';
   return raw(n);
 }
-const match = spec => spec.split(';').some(c => { const [n, v] = c.split('='); const r = raw(n); return v.split('|').some(x => x === r || r.split(', ').includes(x)); });function conditionals(){
+const match = spec => spec.split(';').some(c => { const [n, v] = c.split('='); const r = raw(n); return v.split('|').some(x => x === r || r.split(', ').includes(x)); });
+function conditionals(){
   f.querySelectorAll('[data-show],[data-hide]').forEach(el => {
     el.hidden = el.dataset.show ? !match(el.dataset.show) : match(el.dataset.hide);
   });
